@@ -46,8 +46,6 @@ class Dirsurfer(QMainWindow):
 		self.treeView.setHeaderHidden(True)
 		treeModel = QStandardItemModel()
 		rootNode = treeModel.invisibleRootItem()
-		self.treeView = QTreeView()
-		self.treeView.setHeaderHidden(True)
 
 		self.pathSurf(self.current_path, self.root_item)
 
@@ -89,59 +87,40 @@ class Dirsurfer(QMainWindow):
 				item.appendRow(current_item)
 
 
-	# def filterSurf(self, path):
+	def filterSurf(self, path, item: CommonItem):
 
-	# 	filter_name: str = self.qlineEdit.text()
-	# 	filtered_node: CommonItem = None
-	# 	if  filter_name == '':
-	# 		filtered_node: CommonItem = CommonItem('~', 16, set_bold=True, color=QColor(1, 204, 67))
-	# 		self.pathSurf(self.current_path, filtered_node)
-	# 	else:
-	# 		for i in os.listdir(path):
-	# 			print(i)
-	# 			if os.path.isdir(path + i):
-	# 				if i == filter_name:
-	# 					filtered_node = CommonItem(i, 14, set_bold=True, color=QColor(1, 204, 67))
-	# 					self.pathSurf(path + i + '/', filtered_node)
-	# 					break
-	# 				self.filterSurf(path + i + '/')
-	# 			else:
-	# 				if i == filter_name:
-	# 					filtered_node = CommonItem(i, 12, set_bold=False, color=QColor(1, 204, 67))
-	# 					break
+		filter_name: str = self.qlineEdit.text()
 
-	# 	return filtered_node
-
-	def filterSurf(self, path):
-
-		root_filter = CommonItem('Filtered', 16, set_bold=True, color=QColor(1, 204, 67))
-		filter_name = self.qlineEdit.text()
-
-	 	for i in os.listdir(path):
-			print(i)
+		for i in os.listdir(path):
 			if os.path.isdir(path + i):
 				if i == filter_name:
-					filtered_node = CommonItem(i, 14, set_bold=True, color=QColor(1, 204, 67))
-					self.pathSurf(path + i + '/', filtered_node)
-					break
-				self.filterSurf(path + i + '/')
+					current_item = CommonItem(f'{i} path: {path}', 14, set_bold=True, color=QColor(1, 204, 67))
+					item.appendRow(current_item)
+					self.pathSurf(path + i + '/', current_item)
+				else:
+					self.filterSurf(path + i + '/', item)
 			else:
 				if i == filter_name:
-					filtered_node = CommonItem(i, 12, set_bold=False, color=QColor(1, 204, 67))
-					break
+					current_item = CommonItem(f'{i} path: {path}', 12, set_bold=False)
+					item.appendRow(current_item)
 
 
 	def updateFilteredTree(self):
 
 		treeModel = QStandardItemModel()
 		rootNode = treeModel.invisibleRootItem()
+		self.root_item = CommonItem('Filtered', 16, set_bold=True, color=QColor(1, 204, 67))
 
 		if self.qlineEdit.text() != '':
-			rootNode.appendRow(self.filterSurf('/home/roman/'))
+			self.filterSurf(self.current_path, self.root_item)
+			rootNode.appendRow(self.root_item)
 			self.treeView.setModel(treeModel)
+			self.treeView.expandAll()
 		else:
-			return
-
+			self.root_item = CommonItem('~', 16, set_bold=True, color=QColor(1, 204, 67))
+			self.pathSurf(self.current_path, self.root_item)
+			rootNode.appendRow(self.root_item)
+			self.treeView.setModel(treeModel)
 
 
 
